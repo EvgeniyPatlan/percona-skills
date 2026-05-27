@@ -20,7 +20,7 @@ For backups (Percona XtraBackup), `pt-*` tools (Percona Toolkit), clustering (PX
 | "Percona Server has different SQL syntax / isn't a real drop-in" | It **is** a drop-in for the matching MySQL version — identical SQL, protocol, and replication. Only *extra* features and some defaults differ |
 | Treating Percona Server like MariaDB (no `RETURNING`, `SEQUENCE`, GTID incompatibility) | Wrong product. Percona Server == MySQL semantics. MariaDB-isms do not apply |
 | Hand-rolling per-table/per-user query stats from the slow log | Use built-in **User Statistics** (`userstat=ON`) — `INFORMATION_SCHEMA.CLIENT_STATISTICS`, `TABLE_STATISTICS`, `INDEX_STATISTICS`, `USER_STATISTICS` |
-| `FLUSH TABLES WITH READ LOCK` to take a consistent backup | Use **backup locks**: `LOCK TABLES FOR BACKUP` + `LOCK BINLOG FOR BACKUP` — far less blocking; this is what XtraBackup uses |
+| `FLUSH TABLES WITH READ LOCK` to take a consistent backup | Use **backup locks**: `LOCK TABLES FOR BACKUP` (Percona) or `LOCK INSTANCE FOR BACKUP` (MySQL-native) — far less blocking; this is what XtraBackup uses |
 | "Install the audit plugin from MySQL Enterprise" | Percona Server bundles the open-source **Audit Log Filter** component (and the older Audit Log plugin) — no Enterprise license |
 | "Use the MySQL Enterprise Thread Pool" | Percona Server includes an open-source **threadpool** (`thread_handling=pool-of-threads`) |
 | "Keyring Vault needs MySQL Enterprise" | Percona Server ships the **HashiCorp Vault keyring** component in the open-source build |
@@ -85,7 +85,7 @@ FROM INFORMATION_SCHEMA.TABLES WHERE CREATE_OPTIONS LIKE '%ENCRYPTION%';
 
 | Feature | What it gives you | Min version |
 |---|---|---|
-| **Backup locks** — `LOCK TABLES FOR BACKUP`, `LOCK BINLOG FOR BACKUP` | Lightweight locking for consistent backups without blocking reads/most writes | 8.0+ |
+| **Backup locks** — `LOCK TABLES FOR BACKUP` (+ `LOCK INSTANCE FOR BACKUP`) | Lightweight locking for consistent backups without blocking reads/most writes | 8.0+ |
 | **Kill idle transactions** — `kill_idle_transaction` | Auto-end transactions idle past a timeout, freeing locks/undo | 8.0+ |
 | **Threadpool** — `thread_handling=pool-of-threads` | Scales connection counts without thread-per-connection overhead | 8.0+ |
 | **Extended `SHOW GRANTS`** | Shows roles and all grants in one statement | 8.0+ |
@@ -95,11 +95,10 @@ FROM INFORMATION_SCHEMA.TABLES WHERE CREATE_OPTIONS LIKE '%ENCRYPTION%';
 
 ```sql
 -- backup-safe locking (what XtraBackup does internally)
-LOCK TABLES FOR BACKUP;
-LOCK BINLOG FOR BACKUP;
+LOCK TABLES FOR BACKUP;        -- block DDL + non-transactional writes, allow InnoDB DML
 -- ... copy / snapshot ...
-UNLOCK BINLOG;
 UNLOCK TABLES;
+-- LOCK INSTANCE FOR BACKUP; ... UNLOCK INSTANCE;  -- MySQL-native, blocks DDL only
 ```
 
 ## Components & UDFs Worth Knowing

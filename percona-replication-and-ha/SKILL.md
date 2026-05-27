@@ -57,9 +57,9 @@ Monitor real lag with `pt-heartbeat` (see `percona-toolkit`), not `Seconds_Behin
 ## Semi-Synchronous
 
 ```sql
--- 8.4 uses components + SOURCE/REPLICA names
-INSTALL COMPONENT 'file://component_semi_sync_source';     -- on the source
-INSTALL COMPONENT 'file://component_semi_sync_replica';    -- on each replica
+-- 8.4 ships semi-sync as plugins (SOURCE/REPLICA naming)
+INSTALL PLUGIN rpl_semi_sync_source SONAME 'semisync_source.so';    -- on the source
+INSTALL PLUGIN rpl_semi_sync_replica SONAME 'semisync_replica.so';  -- on each replica
 SET GLOBAL rpl_semi_sync_source_enabled = ON;
 SET GLOBAL rpl_semi_sync_source_wait_point = AFTER_SYNC;   -- lossless
 SET GLOBAL rpl_semi_sync_replica_enabled = ON;             -- replica side

@@ -9,7 +9,7 @@ description: "Writing stored procedures and functions in JavaScript on Percona S
 
 The `js_lang` component lets you write stored functions and procedures in JavaScript (V8 engine) instead of SQL/PSM — useful when the logic is easier in JS. It is **tech preview in Percona Server 8.4**: not yet production-ready, not covered by SLA. Routines run in a sandboxed V8 context with no I/O.
 
-> **Version/status:** Percona Server **8.4**, **tech preview**. Requires `INSTALL COMPONENT` + the `CREATE_JS_ROUTINE` privilege.
+> **Version/status:** Percona Server **8.4**, **tech preview**. Requires `INSTALL COMPONENT` + the `CREATE_JS_ROUTINE` privilege. The `component_js_lang` library is **not** in every standard package (e.g. it is absent from the `percona/percona-server:8.4` Docker image) — confirm it exists in your `plugin_dir` before relying on it.
 
 ## What LLMs Get Wrong
 
