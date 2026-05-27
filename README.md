@@ -38,6 +38,24 @@ Open-source database observability (PMM): client/server architecture, install an
 ### [percona-operator-for-mysql](percona-operator-for-mysql/SKILL.md)
 Running MySQL on Kubernetes. The two distinct operators (PXC-based vs Percona-Server-based), choosing between them, the cluster Custom Resource, scaling, and backups to S3/GCS/Azure.
 
+### [percona-replication-and-ha](percona-replication-and-ha/SKILL.md)
+The non-Galera HA options: asynchronous and GTID replication, semi-synchronous, and Group Replication — how to choose, set up, and monitor them, plus the 8.4 SOURCE/REPLICA syntax. (Galera lives in `percona-xtradb-cluster`.)
+
+### [percona-encryption](percona-encryption/SKILL.md)
+Data-at-rest encryption and keyring management: the master-key hierarchy, encrypting tablespaces / binlogs / redo-undo / temp files, the file/Vault/KMIP/AWS-KMS keyrings, and master-key rotation.
+
+### [percona-audit-logging](percona-audit-logging/SKILL.md)
+The open-source Audit Log Filter: installing the component, the JSON filter rule DSL, assigning filters to users, and log formats/rotation/encryption.
+
+### [percona-data-masking](percona-data-masking/SKILL.md)
+Masking PII and generating synthetic test data with the open-source masking component: the `mask_*`/`gen_*` functions, dictionaries, and why it is a presentation layer, not access control.
+
+### [percona-javascript-stored-procedures](percona-javascript-stored-procedures/SKILL.md)
+Writing stored procedures and functions in JavaScript via the `js_lang` component (tech preview): syntax, privileges, the SQL↔JS type mapping, and the sandbox limits.
+
+### [oracle-to-percona-server](oracle-to-percona-server/SKILL.md)
+Migrating from Oracle Database. Why it is a true rewrite (no Oracle-compatibility mode, unlike MariaDB), data-type mapping, and rewriting PL/SQL, sequences, `ROWNUM`, and `CONNECT BY`.
+
 ## How to install
 
 ### Interactive install with Node.js
@@ -45,13 +63,13 @@ Running MySQL on Kubernetes. The two distinct operators (PXC-based vs Percona-Se
 Use [npx skills](https://github.com/vercel-labs/skills) for an interactive install — choose which Percona skills to install and which agents on your system (Claude, Cursor, Codex, etc.):
 
 ```
-npx skills add EvgeniyPatlan/percona-skills
+npx skills add EvgeniyPatlan/percona-mysql-skills
 ```
 
 Or install one skill:
 
 ```
-npx skills add EvgeniyPatlan/percona-skills/<skill-name>
+npx skills add EvgeniyPatlan/percona-mysql-skills/<skill-name>
 ```
 
 Replace `<skill-name>` with e.g. `percona-xtrabackup` or `mysql-to-percona-server`.
@@ -63,7 +81,7 @@ Download `SKILL.md` into the agent's skill folder, for example:
 ```bash
 mkdir -p ~/.claude/skills/<skill-name>
 curl -o ~/.claude/skills/<skill-name>/SKILL.md \
-  https://raw.githubusercontent.com/EvgeniyPatlan/percona-skills/main/<skill-name>/SKILL.md
+  https://raw.githubusercontent.com/EvgeniyPatlan/percona-mysql-skills/main/<skill-name>/SKILL.md
 ```
 
 - Claude Code and Claude Desktop: `~/.claude/skills/<skill-name>/SKILL.md`
