@@ -9,7 +9,7 @@ description: "Migrating from Oracle Database to Percona Server for MySQL. Use wh
 
 Migrating from Oracle to Percona Server is a **real rewrite**, not a switch. Crucially — unlike MariaDB, which offers `sql_mode=ORACLE` with substantial PL/SQL compatibility — **MySQL and Percona Server have no Oracle compatibility mode at all**: no `sql_mode=ORACLE`, no PL/SQL parser, no packages, no `%TYPE`/`%ROWTYPE`, no `:=`. Schema, stored code, and Oracle-specific SQL must be translated by hand (with tooling assist). Percona Server adds instrumentation/encryption/tooling on top of MySQL — it does not add Oracle syntax.
 
-> **Version:** Recursive CTEs (for `CONNECT BY`), window functions, roles, and JSON all need MySQL/Percona **8.0+**. `PERCONA_SEQUENCE_TABLE()` is 8.4.
+> **Version:** Recursive CTEs (for `CONNECT BY`), window functions, roles, and JSON all need MySQL/Percona **8.0+**. `PERCONA_SEQUENCE_TABLE()` is the preferred form from 8.4 (replaces the deprecated `SEQUENCE_TABLE()`).
 
 ## What LLMs Get Wrong
 

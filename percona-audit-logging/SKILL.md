@@ -1,6 +1,6 @@
 ---
 name: percona-audit-logging
-description: "Auditing connections and SQL with the Audit Log Filter in Percona Server for MySQL. Use when setting up audit logging, writing audit filter rules, meeting compliance/logging requirements, or troubleshooting why audit events aren't captured. IMPORTANT — the Audit Log Filter is an open-source COMPONENT (MySQL Enterprise charges for auditing); the older audit_log plugin is deprecated in 8.4. Filters are defined as JSON via SQL functions (audit_log_filter_set_filter / set_user), NOT config files, and a filter does nothing until it's assigned to a user. All filter field values must be STRINGS (\"0\"/\"1\", not 0/1)."
+description: "Auditing connections and SQL with the Audit Log Filter in Percona Server for MySQL. Use when setting up audit logging, writing audit filter rules, meeting compliance/logging requirements, or troubleshooting why audit events aren't captured. IMPORTANT — the Audit Log Filter is an open-source COMPONENT (MySQL Enterprise charges for auditing); the older audit_log plugin is deprecated in 8.4. Filters are defined as JSON via SQL functions (audit_log_filter_set_filter / set_user), NOT config files, and a filter does nothing until it's assigned to a user."
 ---
 
 # Percona Audit Log Filter
@@ -9,7 +9,7 @@ description: "Auditing connections and SQL with the Audit Log Filter in Percona 
 
 The Audit Log Filter logs (and can block) connections and SQL on Percona Server — open source, where MySQL Enterprise charges for equivalent auditing. It is a **component** managed entirely through SQL functions: you define named JSON filters and assign them to accounts. The older `audit_log` plugin still exists but is **deprecated in 8.4** — prefer the component for new setups (don't run both).
 
-> **Versions:** Component model since 8.0.34. Filter/assignment data lives in `mysql.audit_log_filter` and `mysql.audit_log_user`. Managing it needs `AUDIT_ADMIN`.
+> **Versions:** Available as a component on Percona Server 8.0+/8.4. Filter/assignment data lives in `mysql.audit_log_filter` and `mysql.audit_log_user`. Managing it needs `AUDIT_ADMIN`.
 
 ## What LLMs Get Wrong
 
@@ -20,7 +20,7 @@ The Audit Log Filter logs (and can block) connections and SQL on Percona Server 
 | Bare `INSTALL COMPONENT` then expecting it to work | The filter tables must exist first — run the `audit_log_filter_linux_install.sql` script |
 | Editing a config file to configure auditing | Configure via SQL: `audit_log_filter_set_filter()` + `audit_log_filter_set_user()` |
 | Defining a filter and expecting logging | A filter does nothing until assigned: `audit_log_filter_set_user('%','name')` |
-| `"value": 0` / `"status": 1` (integers) in filter JSON | All filter field values must be **strings**: `"0"`, `"1"` — integers raise "Incorrect rule definition" |
+| Inventing filter keys (`db_name`, `table_name`, `field`/`and` predicates) | Use the documented keys inside the `class` object — `database`, `table`, `user`, `event` — each an array |
 | Editing `mysql.audit_log_filter` rows directly | In-memory state won't update — call `audit_log_filter_flush()` after direct edits |
 | `audit_log_read()` with NEW/OLD XML format | The SQL read API works only with **JSON** format |
 | Expecting filter state to replicate in PXC/replicas | It doesn't auto-apply — run `audit_log_filter_flush()` on each node |
@@ -47,13 +47,12 @@ SELECT audit_log_filter_set_user('%', 'log_all');
 -- Log only connection events
 SELECT audit_log_filter_set_filter('conns', '{"filter": {"class": {"name": "connection"}}}');
 
--- Log writes (INSERT/UPDATE/DELETE) on specific db + table
+-- Log writes (INSERT/UPDATE/DELETE) on specific tables
 SELECT audit_log_filter_set_filter('sales_writes', '{
-  "filter": { "class": { "name": "table_access",
-    "event": { "name": ["insert","update","delete"],
-      "log": { "and": [
-        { "field": { "name": "db_name",    "value": "sales"  } },
-        { "field": { "name": "table_name", "value": "orders" } } ] } } } }
+  "filter": { "class": [{ "name": "table_access",
+    "database": ["sales"],
+    "table": ["orders"],
+    "event": [{"name":"insert"},{"name":"update"},{"name":"delete"}] }] }
 }');
 SELECT audit_log_filter_set_user('%', 'sales_writes');
 
@@ -61,7 +60,7 @@ SELECT audit_log_filter_set_user('%', 'sales_writes');
 SELECT audit_log_filter_set_filter('none', '{"filter": {"log": false}}');
 SELECT audit_log_filter_set_user('backup@localhost', 'none');
 ```
-Remember: status `"0"` = success, `"1"` = failure — as strings. Wildcard host parts in assignments are supported from 8.4.4 (`'u@192.168.0.%'`).
+Keys inside a `class` are arrays (`database`, `table`, `user`, `event`); a `status` element can narrow to successful vs failed operations. Wildcard host parts in assignments are supported from 8.4.4 (`'u@192.168.0.%'`).
 
 ## Output & Operations
 
@@ -71,7 +70,7 @@ SET GLOBAL audit_log_filter.disable = true;             -- pause logging (privil
 SELECT audit_log_filter_flush();                        -- reload after direct table edits
 SELECT audit_log_read(audit_log_read_bookmark());       -- JSON format only
 ```
-Key startup variables (read-only; restart to change): `audit_log_filter.format` (`NEW` XML default / `OLD` / `JSON`), `.handler` (`FILE`/`SYSLOG`), `.strategy`, `.compression` (`GZIP`), `.encryption` (`AES`, needs a keyring). Dynamic: `.rotate_on_size` (default 1 GB; `<4096` disables auto-rotation), `.max_size`, `.prune_seconds`. Only **top-level** statements are audited — not statements inside stored programs; `LOAD DATA` file contents aren't logged.
+Key startup variables (read-only; restart to change): `audit_log_filter.format` (`NEW` XML default / `OLD` / `JSON`), `.handler` (`FILE`/`SYSLOG`), `.strategy`, `.compression` (`GZIP`), `.encryption` (`AES`, needs a keyring). Dynamic: `.rotate_on_size` (default 1 GiB; `<4096` disables auto-rotation), `.max_size`, `.prune_seconds`. Only **top-level** statements are audited — not statements inside stored programs; `LOAD DATA` file contents aren't logged.
 
 ## Sources
 

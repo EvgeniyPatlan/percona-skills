@@ -74,7 +74,7 @@ Doublewrite pages are encrypted automatically for encrypted tablespaces (no vari
 SET GLOBAL table_encryption_privilege_check = ON;   -- needs TABLE_ENCRYPTION_ADMIN to override
 
 -- Cheap master-key rotation (re-wraps tablespace keys; one page-0 write each)
-ALTER INSTANCE ROTATE INNODB MASTER KEY;
+ALTER INSTANCE ROTATE INNODB MASTER KEY;   -- needs ENCRYPTION_KEY_ADMIN
 
 -- Verify
 SELECT TABLE_SCHEMA, TABLE_NAME, CREATE_OPTIONS FROM INFORMATION_SCHEMA.TABLES

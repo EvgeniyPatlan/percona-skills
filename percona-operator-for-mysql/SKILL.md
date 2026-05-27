@@ -109,7 +109,7 @@ OpenShift: both operators install via OperatorHub / OLM (PXC operator is Red Hat
 
 ## Backups & Restore
 
-Both operators back up with **Percona XtraBackup** to S3, Azure Blob, or (PS operator / on-prem PVC) GCS. Scheduled backups go in `spec.backup.schedule[]` (cron) with a retention policy; on-demand backups are a separate `…Backup` CR. **PITR** is GA on the PXC operator (a pod streams binlogs to cloud storage; incompatible with count retention — use bucket lifecycle), tech preview on the PS operator. Restore is its own CR:
+Both operators back up with **Percona XtraBackup** to S3, Azure Blob, or (PS operator / on-prem PVC) GCS. Scheduled backups go in `spec.backup.schedule[]` (cron) with a retention policy; on-demand backups are a separate `…Backup` CR. **PITR** is GA on the PXC operator (a pod streams binlogs to cloud storage; incompatible with any retention policy — use bucket lifecycle), tech preview on the PS operator. Restore is its own CR:
 ```yaml
 apiVersion: pxc.percona.com/v1
 kind: PerconaXtraDBClusterRestore
@@ -138,7 +138,7 @@ kubectl get secret cluster1-secrets -o jsonpath='{.data.root}' | base64 -d   # r
 
 - **Horizontal:** `kubectl patch pxc cluster1 --type merge -p '{"spec":{"pxc":{"size":5}}}'` (odd numbers only). **Vertical:** edit `spec.pxc.resources` (triggers a SmartUpdate rolling restart).
 - **Auto minor upgrades:** `spec.updateStrategy: SmartUpdate` + `spec.upgradeOptions.apply: Recommended`. Operator upgrade order: CRDs/Deployment → bump `crVersion` → pods roll (replicas first, primary last).
-- **Pause/resume:** `spec.pause: true|false`. **Delete keeps PVCs** by default — add the `delete-pxc-pvc` finalizer to drop data too.
+- **Pause/resume:** `spec.pause: true|false`. **Delete keeps PVCs** by default — add the `percona.com/delete-pxc-pvc` finalizer to drop data too.
 - **Debug a stuck reconcile:** `kubectl describe pxc cluster1` (events) → `kubectl logs <pod> -c pxc`.
 
 ## TLS & Users

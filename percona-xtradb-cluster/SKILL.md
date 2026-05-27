@@ -98,7 +98,7 @@ SHOW GLOBAL STATUS LIKE 'wsrep%';
 
 ## Flow Control
 
-When a slow node's receive queue hits `gcs.fc_limit` (default 100) it sends `FC_PAUSE` and **every writer cluster-wide stalls** until it catches up. Diagnose:
+When a slow node's receive queue hits the flow-control limit (`gcs.fc_limit`, config default 100 — the runtime value scales with node count unless `gcs.fc_master_slave=YES`) it sends `FC_PAUSE` and **every writer cluster-wide stalls** until it catches up. Diagnose:
 ```sql
 SHOW STATUS LIKE 'wsrep_flow_control_paused';  -- fraction of time paused; >0.1 is bad
 SHOW STATUS LIKE 'wsrep_flow_control_sent';    -- this node is the bottleneck if rising

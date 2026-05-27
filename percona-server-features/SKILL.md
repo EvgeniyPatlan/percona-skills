@@ -31,7 +31,7 @@ For backups (Percona XtraBackup), `pt-*` tools (Percona Toolkit), clustering (PX
 
 ## Instrumentation & Diagnostics
 
-Percona Server roughly doubles the visibility of stock MySQL (≈95 vs ≈65 `INFORMATION_SCHEMA` tables; ≈850 vs ≈430 global counters).
+Percona Server roughly doubles the visibility of stock MySQL (95 vs 65 `INFORMATION_SCHEMA` tables; 853 vs 434 global counters).
 
 ### User Statistics
 Per-thread, per-user, per-client, per-table, and per-index counters — none of which exist in community MySQL.
@@ -58,7 +58,7 @@ Percona Server brings several encryption capabilities that are Enterprise-only o
 
 - **Data-at-rest encryption** beyond core: binary/relay logs, temporary files, the doublewrite buffer, and enforcement (`table_encryption_privilege_check`, `default_table_encryption`).
 - **Keyring components/plugins**: keyring file *and* **HashiCorp Vault** (Enterprise-only in MySQL).
-- **Audit Log Filter** (`8.0.34+` component model) — rule-based auditing with JSON/XML output, compression, and encryption. The older Audit Log plugin is still available; prefer the filter component for new setups.
+- **Audit Log Filter** (`8.0+` component model) — rule-based auditing with JSON/XML output, compression, and encryption. The older Audit Log plugin is still available; prefer the filter component for new setups.
 - **Data Masking** component — `mask_inner()`, `gen_rnd_email()`, etc., open-source (Enterprise-only upstream).
 - **PAM authentication** plugin (Enterprise-only upstream).
 

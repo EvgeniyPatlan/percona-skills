@@ -18,7 +18,7 @@ Percona Toolkit is a collection of mature, tested command-line tools for MySQL, 
 | `pt-online-schema-change --alter "..." D=db,t=t` and expecting it to run | It only runs checks without `--execute`. Add `--execute` explicitly (mutually exclusive with `--dry-run`) |
 | Running `pt-online-schema-change` for `ADD COLUMN ... DEFAULT` on MySQL 8.0.12+ | That is an `ALGORITHM=INSTANT` change — milliseconds, no copy. Use native DDL; pt-osc is needless overhead here |
 | pt-osc on a table with no PRIMARY KEY / UNIQUE index | Refused — the DELETE trigger needs one (unless the ALTER itself creates it) |
-| pt-osc on an FK-referenced table with no FK option | Must pass `--alter-foreign-keys-method` (`auto`/`rebuild_constraints`/`drop_swap`). `drop_swap` is unsupported on MySQL 8.0+ |
+| pt-osc on an FK-referenced table with no FK option | Must pass `--alter-foreign-keys-method` (`auto`/`rebuild_constraints`/`drop_swap`). `drop_swap` is blocked on MySQL 8.0.0–8.0.14 (bug 89441) |
 | `--alter "DROP FOREIGN KEY fk_x"` in pt-osc | Use `DROP FOREIGN KEY _fk_x` — pt-osc prefixes FK names with `_` on the new table |
 | Adding a UNIQUE index via pt-osc on possibly-duplicate data | pt-osc copies with `INSERT IGNORE` — duplicates are silently dropped. It warns by default; don't disable the check |
 | `pt-table-sync --execute h=src,... dst` in a source↔source topology | Writes directly to `dst` and replicates back, corrupting `src`. Use `--sync-to-source` so changes flow through replication |

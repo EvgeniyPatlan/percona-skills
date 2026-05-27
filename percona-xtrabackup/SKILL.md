@@ -156,7 +156,7 @@ mysql db -e "ALTER TABLE t IMPORT TABLESPACE;"
 - `--safe-slave-backup --slave-info` — the safe combo when backing up a replica.
 - `--history=<name>` — record each run in `PERCONA_SCHEMA.XTRABACKUP_HISTORY`; base incrementals on it with `--incremental-history-name`.
 - Partial backups: `innodb_file_per_table=ON`, select with `--tables` / `--databases`; restored by import (above), never `--copy-back`, and cannot be an incremental base.
-- Large `--prepare`: `--use-memory=2G` (or `--use-free-memory-pct=50`) is far faster than the 128 MB default.
+- Large `--prepare`: `--use-memory=2G` is far faster than the 128 MB default (`--use-free-memory-pct=50` also works, but only if the backup was taken with `--estimate-memory=ON`).
 
 ## Sources
 
