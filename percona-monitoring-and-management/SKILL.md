@@ -20,7 +20,7 @@ PMM is Percona's open-source observability platform for databases. It is **clien
 | Expecting QAN to work out of the box | QAN needs a data source enabled on the DB: slow query log **or** Performance Schema. Neither is fully configured by default |
 | Installing PMM Client on the PMM Server host to watch each DB | `pmm-agent` runs on each **database** host, not on the server. (Exception: AWS RDS is monitored remotely with no client on the instance) |
 | `--query-source=perfschema` for Percona Server | For Percona Server / PXC use the **slow log** (richer data, sampling); use Performance Schema for stock MySQL / MariaDB |
-| Exposing PMM Server on plain HTTP, default creds | Use HTTPS (443), change the default `admin` password immediately, replace the self-signed cert for production |
+| Exposing PMM Server on plain HTTP, default creds | Use HTTPS (PMM 3: container port **8443**; PMM 2: **443**), change the default `admin` password immediately, replace the self-signed cert for production |
 | Slow-log QAN with a remote PMM Client | Slow-log QAN needs the client on the **same host** (it reads the file). For remote-only DBs use Performance Schema |
 | Mixing PMM 2 and PMM 3 packages/images | Match them: server `:3` ↔ `pmm-client` v3, server `:2` ↔ `pmm2-client` |
 | `pt-query-digest` makes PMM QAN redundant | Complementary: `pt-query-digest` is one-shot offline log analysis; QAN is continuous, stored, interactive |
@@ -30,14 +30,14 @@ PMM is Percona's open-source observability platform for databases. It is **clien
 - **PMM Server** — `pmm-managed` (API/orchestration), **VictoriaMetrics** (metrics), **ClickHouse** (QAN data), **Grafana** (dashboards), Alertmanager, an internal PostgreSQL, behind Nginx (TLS).
 - **PMM Client** per DB host — `pmm-agent` (daemon), `pmm-admin` (CLI), `vmagent` (pushes metrics), and exporters (`mysqld_exporter`, `node_exporter`, etc.).
 - **Data flow:** exporters → `vmagent` push → VictoriaMetrics; QAN agent collects query buckets each minute → ClickHouse.
-- **Ports:** 443 (server UI/API, HTTPS), 7777 (agent), exporter range 42000–51999.
+- **Ports:** server UI/API on **8443/8080** in PMM 3 (was **443/80** in PMM 2), agent on 7777, exporter range 42000–51999.
 
 ## Install & Connect
 
 ```bash
 # 1. PMM Server (Docker). Persist /srv on a named volume.
 docker volume create pmm-data
-docker run -d --restart always -p 443:443 -v pmm-data:/srv \
+docker run -d --restart always -p 8443:8443 -v pmm-data:/srv \
   --name pmm-server percona/pmm-server:3
 docker exec -t pmm-server change-admin-password <new_password>
 
@@ -49,7 +49,7 @@ sudo apt update && sudo apt install -y pmm-client    # pmm2-client for PMM 2.x
 
 # 3. Register the node with the server
 pmm-admin config --server-insecure-tls \
-  --server-url=https://admin:<password>@<PMM_SERVER_IP>:443
+  --server-url=https://admin:<password>@<PMM_SERVER_IP>:8443   # PMM 3; use :443 for PMM 2
 ```
 
 MySQL monitoring user:
