@@ -129,9 +129,6 @@ SELECT CAST(get_binlog_by_gtid('<uuid>:123') AS CHAR);
 
 Several larger areas — **data-at-rest encryption** (incl. KMIP/AWS KMS keyrings), the **Audit Log Filter**, **data masking**, and **JavaScript stored procedures** (`js_lang`, tech preview 8.4) — are deep enough for their own guidance; check the docs for full SQL.
 
-## Percona Server Pro
-
-Percona also offers **Percona Server Pro** builds (extra packaging/support features) on top of the open-source server. The core enhancements above are in the standard open-source build; do not assume a feature requires Pro unless the docs say so.
 
 ## Sources
 
